@@ -327,6 +327,10 @@ class AstrBotDashboard:
         path = current_request.url.path
         if not path.startswith("/api"):
             return None
+        # fcore 定制：AstrBot 仅监听 127.0.0.1，由上游 fcore 单密码统一把关；回环请求直接放行
+        _client_host = (current_request.client.host if current_request.client else "") or ""
+        if _client_host in {"127.0.0.1", "localhost", "::1", "::ffff:127.0.0.1"}:
+            return None
         rate_limit_response = await self._apply_auth_rate_limit(current_request, path)
         if rate_limit_response is not None:
             return rate_limit_response
