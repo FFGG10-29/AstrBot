@@ -637,7 +637,7 @@ class AstrBotDashboard:
         host = (
             os.environ.get("DASHBOARD_HOST")
             or os.environ.get("ASTRBOT_DASHBOARD_HOST")
-            or dashboard_config.get("host", "0.0.0.0")
+            or dashboard_config.get("host", "127.0.0.1")
         )
         enable = dashboard_config.get("enable", True)
         ssl_config = dashboard_config.get("ssl", {})

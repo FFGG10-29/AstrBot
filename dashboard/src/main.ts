@@ -11,6 +11,16 @@ import print from 'vue3-print-nb';
 import { setupHttpClient } from './api/http';
 import { waitForRouterReadyInBackground } from './utils/routerReadiness.mjs';
 
+// 免密：AstrBot 仅监听 127.0.0.1，由上游 fcore 统一鉴权；无 token 时写入占位值，
+// 避免 Vue 路由守卫跳转登录页（后端 4.29.3 的 auth.py 对回环请求已放行）。
+try {
+  if (!localStorage.getItem('token')) {
+    localStorage.setItem('token', 'astrbot-noauth');
+  }
+} catch (_e) {
+  // ignore
+}
+
 setupHttpClient();
 
 /**

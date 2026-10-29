@@ -104,7 +104,15 @@ def _extract_dashboard_jwt(request: Request) -> str | None:
     return None
 
 
+def _is_loopback(request: Request) -> bool:
+    host = (request.client.host if request.client else "") or ""
+    return host in {"127.0.0.1", "localhost", "::1", "::ffff:127.0.0.1"}
+
+
 async def require_dashboard_user(request: Request) -> str:
+    # AstrBot 仅监听 127.0.0.1，由上游 fcore 单密码统一把关；本地请求直接放行
+    if _is_loopback(request):
+        return "astrbot"
     if username := _get_dashboard_state_username(request):
         return username
 
@@ -165,6 +173,9 @@ async def _require_api_key_scope(
 
 
 async def require_scope(request: Request, scope: str) -> AuthContext:
+    # AstrBot 仅监听 127.0.0.1，由上游 fcore 单密码统一把关；本地请求直接放行
+    if _is_loopback(request):
+        return AuthContext(username="astrbot", scopes=["*"], via="loopback")
     raw_key = _extract_raw_api_key(request)
     if raw_key:
         return await _require_api_key_scope(request, raw_key, scope)
